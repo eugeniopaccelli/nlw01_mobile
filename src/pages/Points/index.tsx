@@ -1,13 +1,28 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Image, TouchableOpacity, Text, ScrollView } from 'react-native'
 import { Feather as Icon } from '@expo/vector-icons'
 import Constants from 'expo-constants'
 import {useNavigation } from '@react-navigation/native'
 import MapView, { Marker } from 'react-native-maps'
 import {SvgUri } from 'react-native-svg'
+import api from '../../services/api';
 
+
+interface Item {
+  id: number;
+  title: string;
+  image_url: string
+}
 
 const Points = () => {
+
+  const [items, setItems] = useState<Item[]>([])
+
+  useEffect(()=>{
+    api.get('items').then(response => {
+      setItems(response.data)
+    });
+  },[])
 
   const navigation = useNavigation()
 
@@ -48,35 +63,15 @@ const Points = () => {
     </View>
     <View style={styles.itemsContainer}>
     <ScrollView contentContainerStyle={{paddingHorizontal: 20 }} horizontal showsHorizontalScrollIndicator={false}> 
-      <TouchableOpacity style={styles.item} onPress={() => {}}>
-        <SvgUri width={42} height={42} uri="http://192.168.0.18:3333/uploads/lampadas.svg" />
-        <Text style={styles.itemTitle}>lâmpadas</Text>
-      </TouchableOpacity>
+      {items.map(item => (
+         <TouchableOpacity key={String(item.id)} style={styles.item} onPress={() => {}}>
+         <SvgUri width={42} height={42} uri="http://192.168.0.18:3333/uploads/lampadas.svg" />
+         <Text style={styles.itemTitle}>{item.title}</Text>
+       </TouchableOpacity>
+      ))}
+      
 
-      <TouchableOpacity style={styles.item} onPress={() => {}}>
-        <SvgUri width={42} height={42} uri="http://192.168.0.18:3333/uploads/lampadas.svg" />
-        <Text style={styles.itemTitle}>lâmpadas</Text>
-      </TouchableOpacity> 
-
-      <TouchableOpacity style={styles.item} onPress={() => {}}>
-        <SvgUri width={42} height={42} uri="http://192.168.0.18:3333/uploads/lampadas.svg" />
-        <Text style={styles.itemTitle}>lâmpadas</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.item} onPress={() => {}}>
-        <SvgUri width={42} height={42} uri="http://192.168.0.18:3333/uploads/lampadas.svg" />
-        <Text style={styles.itemTitle}>lâmpadas</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.item} onPress={() => {}}>
-        <SvgUri width={42} height={42} uri="http://192.168.0.18:3333/uploads/lampadas.svg" />
-        <Text style={styles.itemTitle}>lâmpadas</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.item} onPress={() => {}}>
-        <SvgUri width={42} height={42} uri="http://192.168.0.18:3333/uploads/lampadas.svg" />
-        <Text style={styles.itemTitle}>lâmpadas</Text>
-      </TouchableOpacity>
+      
       </ScrollView>
 
            
