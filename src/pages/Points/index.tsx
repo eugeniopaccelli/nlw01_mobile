@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Image, TouchableOpacity, Text, ScrollView } from 'react-native'
 import { Feather as Icon } from '@expo/vector-icons'
 import Constants from 'expo-constants'
-import {useNavigation } from '@react-navigation/native'
+import { useNavigation } from '@react-navigation/native'
 import MapView, { Marker } from 'react-native-maps'
-import {SvgUri } from 'react-native-svg'
+import { SvgUri } from 'react-native-svg'
 import api from '../../services/api';
 
 
@@ -17,65 +17,82 @@ interface Item {
 const Points = () => {
 
   const [items, setItems] = useState<Item[]>([])
+  const [selectedItems, setSelectedItems ] = useState<number[]>([])
 
-  useEffect(()=>{
+  useEffect(() => {
     api.get('items').then(response => {
       setItems(response.data)
     });
-  },[])
+  }, [])
 
   const navigation = useNavigation()
 
-  function handleNavigateBack(){
+  function handleNavigateBack() {
     navigation.goBack()
   }
 
-  function handleNavigateToDetail(){
+  function handleNavigateToDetail() {
     navigation.navigate('Detail')
   }
 
 
-  return(
+  function handleSelectItem(id: number){
+    const alreadySelected = selectedItems.findIndex(item => item === id)
+    if(alreadySelected >= 0){
+      const filteredItems = selectedItems.filter(item => item !== id);
+      setSelectedItems(filteredItems)
+    }else {
+      setSelectedItems([...selectedItems, id])
+    }
+  }
+
+
+  return (
     <>
-    <View style={styles.container}>
-      <TouchableOpacity onPress={handleNavigateBack}>
-        <Icon name="arrow-left" size={20} color="#34cb79" />
-      </TouchableOpacity>
-      <Text style={styles.title}>Bem Vindo(a)</Text>
-      <Text style={styles.description}>Encontre no mapa, um ponto de coleta.</Text>
-      <View style={styles.mapContainer}>
-        <MapView
-        style={styles.map}
-        initialRegion={{
-          latitude: -5.0961945,
-          longitude: -42.8150323,
-          latitudeDelta: 0.014,
-          longitudeDelta: 0.014,
-        }}>
-          <Marker onPress={handleNavigateToDetail} style={styles.mapMarker} coordinate={{latitude: -5.0961945,longitude: -42.8150323}}>
+      <View style={styles.container}>
+        <TouchableOpacity onPress={handleNavigateBack}>
+          <Icon name="arrow-left" size={20} color="#34cb79" />
+        </TouchableOpacity>
+        <Text style={styles.title}>Bem Vindo(a)</Text>
+        <Text style={styles.description}>Encontre no mapa, um ponto de coleta.</Text>
+        <View style={styles.mapContainer}>
+          <MapView
+            style={styles.map}
+            initialRegion={{
+              latitude: -5.0961945,
+              longitude: -42.8150323,
+              latitudeDelta: 0.014,
+              longitudeDelta: 0.014,
+            }}>
+            <Marker onPress={handleNavigateToDetail} style={styles.mapMarker} coordinate={{ latitude: -5.0961945, longitude: -42.8150323 }}>
               <View style={styles.mapMarkerContainer}>
-              <Image style={styles.mapMarkerImage} source={{uri: 'https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60'}} />
-              <Text style={styles.mapMarkerTitle}>Bar da Belita</Text>
+                <Image style={styles.mapMarkerImage} source={{ uri: 'https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60' }} />
+                <Text style={styles.mapMarkerTitle}>Bar da Belita</Text>
               </View>
             </Marker>
-        </MapView>
+          </MapView>
+        </View>
       </View>
-    </View>
-    <View style={styles.itemsContainer}>
-    <ScrollView contentContainerStyle={{paddingHorizontal: 20 }} horizontal showsHorizontalScrollIndicator={false}> 
-      {items.map(item => (
-         <TouchableOpacity key={String(item.id)} style={styles.item} onPress={() => {}}>
-         <SvgUri width={42} height={42} uri="http://192.168.0.18:3333/uploads/lampadas.svg" />
-         <Text style={styles.itemTitle}>{item.title}</Text>
-       </TouchableOpacity>
-      ))}
-      
+      <View style={styles.itemsContainer}>
+        <ScrollView contentContainerStyle={{ paddingHorizontal: 20 }} horizontal showsHorizontalScrollIndicator={false}>
+          {items.map(item => (
+            <TouchableOpacity
+              activeOpacity={0.7}
+              key={String(item.id)}
+              style={[styles.item, selectedItems.includes(item.id) ? styles.selectedItem : {} ]}
+              onPress={() => handleSelectItem(item.id)}
+            >
+              <SvgUri width={42} height={42} uri="http://192.168.0.18:3333/uploads/lampadas.svg" />
+              <Text style={styles.itemTitle}>{item.title}</Text>
+            </TouchableOpacity>
+          ))}
 
-      
-      </ScrollView>
 
-           
-    </View>
+
+        </ScrollView>
+
+
+      </View>
     </>
   );
 }
@@ -115,7 +132,7 @@ const styles = StyleSheet.create({
 
   mapMarker: {
     width: 90,
-    height: 80, 
+    height: 80,
   },
 
   mapMarkerContainer: {
